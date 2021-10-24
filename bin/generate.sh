@@ -6,64 +6,74 @@
 IFS=$'\n'
 LANG=C
 
-function zzz_config()
-{
-	local FILE="$1"
-	local LINES=()
-
-	LINES+=($(LANG=C grep "/\\*\\*< Config: " "$FILE" | sort))
-
-	[ ${#LINES[@]} = 0 ] && return
-
-	echo " *"
-	echo " * | Config Item | Global Variable | Description |"
-	echo " * | :---------- | :-------------- | :---------- |"
-
-	for L in ${LINES[*]}; do
-		if [[ "$L" =~ .*[[:space:]*](.*)[[:space:]]=[[:space:]].*\;[[:space:]]*/\*\*\<[[:space:]]Config:[[:space:]](.*)[[:space:]]\*/ ]]; then
-			VAR="${BASH_REMATCH[1]}"
-			DESC="${BASH_REMATCH[2]}"
-			CFG="$(echo "$VAR" | sed -e 's/\<C_//' -e 's/8bit/_&/' -e 's/\(Tlsv1\)\([0-9]\)/\1_\2/' -e 's/[A-Z]/_\l&/g' -e 's/^_//')"
-
-			echo " * | '$CFG' | #$VAR | $DESC |"
-		elif [[ "$L" =~ .*[[:space:]*](.*)\;[[:space:]]*/\*\*\<[[:space:]]Config:[[:space:]](.*)[[:space:]]\*/ ]]; then
-			VAR="${BASH_REMATCH[1]}"
-			DESC="${BASH_REMATCH[2]}"
-			CFG="$(echo "$VAR" | sed -e 's/\<C_//' -e 's/8bit/_&/' -e 's/\(Tlsv1\)\([0-9]\)/\1_\2/' -e 's/[A-Z]/_\l&/g' -e 's/^_//')"
-
-			echo " * | '$CFG' | #$VAR | $DESC |"
-		fi
-	done
-}
-
 function zzz_data()
 {
 	local FILE="$1"
 	local LINES=()
 
-	LINES+=($(LANG=C grep "^ \\* [A-Z][A-Za-z0-9_]\\+ - " "$FILE"))
-	LINES+=($(LANG=C grep "^[^ ].*/\\*\\*< " "$FILE" | grep -v "Config:"))
+	LINES+=($(LANG=C grep "^ \\* [A-Z][A-Za-z0-9_]\\+[a-z] - " "$FILE"))
+	LINES+=($(LANG=C grep "^[^ #].*///< " "$FILE"))
 
 	[ ${#LINES[@]} = 0 ] && return
 
 	echo " *"
-	echo " * | Data | Description |"
-	echo " * | :--- | :---------- |"
+	echo " * ## Data"
+	echo " *"
+	echo " * | Data | Description | Links |"
+	echo " * | :--- | :---------- | :---- |"
 
 	(
 	for L in ${LINES[*]}; do
-		if [[ "$L" =~ [[:space:]*]*(.*)[[:space:]]-[[:space:]](.*) ]]; then
+		# * MxCompOps - Compressed Mailbox - Implements ::MxOps - @ingroup mx_api
+		if [[ "$L" =~ ^[[:space:]*]*([A-Z][A-Za-z0-9_]+)[[:space:]]-[[:space:]](.*)[[:space:]]-[[:space:]]Implements[[:space:]](.*)[[:space:]]-[[:space:]]@ingroup[[:space:]](.*) ]]; then
 			VAR="${BASH_REMATCH[1]}"
 			DESC="${BASH_REMATCH[2]}"
-			echo " * | #$VAR | $DESC |"
-		elif [[ "$L" =~ .*[[:space:]*]+([A-Za-z0-9_]+)[[:space:]]=[[:space:]].*\;[[:space:]]*/\*\*\<[[:space:]](.*)[[:space:]]\*/ ]]; then
+			IMPL="${BASH_REMATCH[3]}"
+			GROUP="${BASH_REMATCH[4]}"
+			GROUP="<a href='group__${GROUP//_/__}.html'><b>$GROUP</b></a>"
+			echo " * | #$VAR | $DESC | $IMPL, $GROUP |"
+
+		# * CryptModPgpClassic - CLI PGP - Implements ::CryptModuleSpecs
+		elif [[ "$L" =~ ^[[:space:]*]*([A-Z][A-Za-z0-9_]+)[[:space:]]-[[:space:]](.*)[[:space:]]-[[:space:]]Implements[[:space:]](.*) ]]; then
 			VAR="${BASH_REMATCH[1]}"
 			DESC="${BASH_REMATCH[2]}"
-			echo " * | #$VAR | $DESC |"
-		elif [[ "$L" =~ .*[[:space:]*]+([A-Za-z0-9_]+)\;[[:space:]]*/\*\*\<[[:space:]](.*)[[:space:]]\*/ ]]; then
+			IMPL="${BASH_REMATCH[3]}"
+			echo " * | #$VAR | $DESC | $IMPL |"
+
+		# * MuttLogger - The log dispatcher - @ingroup logging_api
+		elif [[ "$L" =~ ^[[:space:]*]*([A-Z][A-Za-z0-9_]+)[[:space:]]-[[:space:]](.*)[[:space:]]-[[:space:]]@ingroup[[:space:]](.*) ]]; then
 			VAR="${BASH_REMATCH[1]}"
 			DESC="${BASH_REMATCH[2]}"
-			echo " * | #$VAR | $DESC |"
+			GROUP="${BASH_REMATCH[3]}"
+			GROUP="<a href='group__${GROUP//_/__}.html'><b>$GROUP</b></a>"
+			echo " * | #$VAR | $DESC | $GROUP |"
+
+		# * AddressError - An out-of-band error code
+		elif [[ "$L" =~ ^[[:space:]*]*([A-Z][A-Za-z0-9_]+)[[:space:]]-[[:space:]](.*) ]]; then
+			VAR="${BASH_REMATCH[1]}"
+			DESC="${BASH_REMATCH[2]}"
+			echo " * | #$VAR | $DESC | |"
+
+		# struct MuttWindow *RootWindow = NULL; ///< Parent of all Windows
+		elif [[ "$L" =~ ^.*[[:space:]*]([a-zA-Z0-9_]+)(\[[A-Z0-9]+\])*([[:space:]]=[[:space:]].*)\;.*///\<[[:space:]](.*) ]]; then
+			VAR="${BASH_REMATCH[1]}"
+			DESC="${BASH_REMATCH[4]}"
+			echo " * | #$VAR | $DESC | |"
+
+		# int QuotedColors[COLOR_QUOTES_MAX]; ///< Array of colours for quoted email text
+		elif [[ "$L" =~ ^.*[[:space:]*]([a-zA-Z0-9_]+)(\[[A-Z0-9_]+\])*\;.*///\<[[:space:]](.*) ]]; then
+			VAR="${BASH_REMATCH[1]}"
+			DESC="${BASH_REMATCH[3]}"
+			echo " * | #$VAR | $DESC | |"
+
+		# WHERE struct ListHead AlternativeOrderList INITVAL(STAILQ_HEAD_INITIALIZER(AlternativeOrderList)); ///< List of preferred mime types to display
+		elif [[ "$L" =~ ^.*[[:space:]*]([a-zA-Z0-9_]+)([[:space:]]INITVAL\(.*\))\;.*///\<[[:space:]](.*) ]]; then
+			VAR="${BASH_REMATCH[1]}"
+			DESC="${BASH_REMATCH[3]}"
+			echo " * | #$VAR | $DESC | |"
+
+		else
+			echo "MISS: $L" 1>&2
 		fi
 	done
 	) | sort
@@ -74,31 +84,78 @@ function zzz_functions()
 	local FILE="$1"
 	local LINES=()
 
-	LINES=($(LANG=C grep "^ \\* [a-z0-9_]\\+ - " "$FILE" | LANG=C sort))
+	LINES=($(LANG=C grep -e "^ \\* [a-z0-9_]\\+ - " -e "^ \\* [A-Z_]\\+ - " "$FILE" | LANG=C sort))
 
 	[ ${#LINES[@]} = 0 ] && return
 
 	echo " *"
-	echo " * | Function | Description |"
-	echo " * | :------- | :---------- |"
+	echo " * ## Functions"
+	echo " *"
+	echo " * | Function | Description | Links |"
+	echo " * | :------- | :---------- | :---- |"
 
 	for L in ${LINES[*]}; do
-		if [[ "$L" =~ ^[[:space:]*]*((address|bool|command|comp|crypto*_|cs|driver_|dump|filter|getdns|hcache|imap_|log_|long|magic|mbox_|mbtable|mmdf_|mutt_|mx_|nm_|nntp_|number|path|pgp_|pop_|quad|raw_|regex|rfc1524_|rfc2047_|rfc2231_|serial_|smime_|sort|string|tunnel_|url|window).*)[[:space:]]-[[:space:]](.*[[:space:]]-[[:space:]].*) ]]; then
-			FUNC="${BASH_REMATCH[1]}"
-			DESC="${BASH_REMATCH[3]}"
-			echo " * | $FUNC() | $DESC |"
-		elif [[ "$L" =~ ^[[:space:]*]*(.*_validator)[[:space:]]-[[:space:]](.*[[:space:]]-[[:space:]].*) ]]; then
+		# * address_destroy - Destroy an Address object - Implements ConfigSetType::destroy() - @ingroup cfg_type_destroy
+		if [[ "$L" =~ ^[[:space:]*]*([a-z][a-z0-9_]+)[[:space:]]-[[:space:]](.*)[[:space:]]-[[:space:]]Implements[[:space:]](.*)[[:space:]]-[[:space:]]@ingroup[[:space:]](.*) ]]; then
 			FUNC="${BASH_REMATCH[1]}"
 			DESC="${BASH_REMATCH[2]}"
-			echo " * | $FUNC() | $DESC |"
-		elif [[ "$L" =~ ^[[:space:]*]*((account|address|attach|bool|ci|command|comp|crypto*_|cs|driver_|dump|filter|getdns|hcache|imap_|km|log_|long|magic|mailbox|mbox_|mbtable|menu|mix|mmdf_|mutt_|mx_|myvar|neomutt|nm_|nntp_|number|path|pgp_|pop_|quad|raw_|regex|rfc1524_|rfc2047_|rfc2231_|rfc3676|serial_|smime_|sort|state|string|text|tunnel_|update|url|wcs|window).*)[[:space:]]-[[:space:]](.*) ]]; then
+			IMPL="${BASH_REMATCH[3]}"
+			GROUP="${BASH_REMATCH[4]}"
+			GROUP="<a href='group__${GROUP//_/__}.html'><b>$GROUP</b></a>"
+			echo " * | $FUNC() | $DESC | $IMPL, $GROUP |"
+
+		# * compr_lz4_close - Implements ComprOps::close() - @ingroup compress_close
+		elif [[ "$L" =~ ^[[:space:]*]*([a-z][a-z0-9_]+)[[:space:]]-[[:space:]]Implements[[:space:]](.*)[[:space:]]-[[:space:]]@ingroup[[:space:]](.*) ]]; then
 			FUNC="${BASH_REMATCH[1]}"
-			DESC="${BASH_REMATCH[3]}"
-			echo " * | $FUNC() | $DESC |"
-		elif [[ "$L" =~ ^[[:space:]*]*(comp|edit_or_view_message|feature_enabled|is_from|log_disp_curses|main|menu_status_line|print_copyright|print_version|safe_asprintf)[[:space:]]-[[:space:]](.*) ]]; then
+			IMPL="${BASH_REMATCH[2]}"
+			GROUP="${BASH_REMATCH[3]}"
+			GROUP="<a href='group__${GROUP//_/__}.html'><b>$GROUP</b></a>"
+			echo " * | $FUNC() | | $IMPL, $GROUP |"
+
+		# * mutt_expando_format - Expand expandos (%x) in a string - @ingroup expando_api
+		elif [[ "$L" =~ ^[[:space:]*]*([a-z][a-z0-9_]+)[[:space:]]-[[:space:]](.*)[[:space:]]-[[:space:]]@ingroup[[:space:]](.*) ]]; then
 			FUNC="${BASH_REMATCH[1]}"
 			DESC="${BASH_REMATCH[2]}"
-			echo " * | $FUNC() | $DESC |"
+			GROUP="${BASH_REMATCH[3]}"
+			GROUP="<a href='group__${GROUP//_/__}.html'><b>$GROUP</b></a>"
+			echo " * | $FUNC() | $DESC | $GROUP |"
+
+		# * mx_ac_add - Add a Mailbox to an Account - Wrapper for MxOps::ac_add()
+		elif [[ "$L" =~ ^[[:space:]*]*([a-z][a-z0-9_]+)[[:space:]]-[[:space:]](.*)[[:space:]]-[[:space:]]Wrapper[[:space:]]for[[:space:]](.*) ]]; then
+			FUNC="${BASH_REMATCH[1]}"
+			DESC="${BASH_REMATCH[2]}"
+			WRAP="${BASH_REMATCH[3]}"
+			echo " * | $FUNC() | $DESC | $WRAP |"
+
+		# * eat_date - Parse a date pattern - Implements ::eat_arg_t
+		elif [[ "$L" =~ ^[[:space:]*]*([a-z][a-z0-9_]+)[[:space:]]-[[:space:]](.*)[[:space:]]-[[:space:]]Implements[[:space:]](.*) ]]; then
+			FUNC="${BASH_REMATCH[1]}"
+			DESC="${BASH_REMATCH[2]}"
+			IMPL="${BASH_REMATCH[3]}"
+			echo " * | $FUNC() | $DESC | $IMPL |"
+
+		# * mutt_hcache_close - Multiplexor for StoreOps::close
+		# * crypt_pgp_check_traditional - Wrapper for CryptModuleSpecs::pgp_check_traditional()
+		elif [[ "$L" =~ ^[[:space:]*]*([a-z][a-z0-9_]+)[[:space:]]-[[:space:]](Wrapper|Multiplexor)[[:space:]]for[[:space:]](.*) ]]; then
+			FUNC="${BASH_REMATCH[1]}"
+			WRAP="${BASH_REMATCH[3]}"
+			echo " * | $FUNC() | | $WRAP |"
+
+
+		# * abbrev_folder - Abbreviate a Mailbox path using a folder
+		elif [[ "$L" =~ ^[[:space:]*]*([a-z][a-z0-9_]+)[[:space:]]-[[:space:]](.*) ]]; then
+			FUNC="${BASH_REMATCH[1]}"
+			DESC="${BASH_REMATCH[2]}"
+			echo " * | $FUNC() | $DESC | |"
+
+		# ARRAY_HEAD - Define a named struct for arrays of elements of a certain type
+		elif [[ "$L" =~ ^[[:space:]*]*([A-Z][A-Z_]+)[[:space:]]-[[:space:]](.*) ]]; then
+			FUNC="${BASH_REMATCH[1]}"
+			DESC="${BASH_REMATCH[2]}"
+			echo " * | $FUNC() | $DESC | |"
+
+		else
+			echo "MISS: $L" 1>&2
 		fi
 	done
 }
@@ -113,7 +170,6 @@ function build_zzz()
 		echo " *"
 
 		echo "$FILE" 1>&2
-		zzz_config    "$FILE"
 		zzz_data      "$FILE"
 		zzz_functions "$FILE"
 
@@ -132,8 +188,8 @@ function build_docs()
 	VERSION=$(git_version)
 
 	(
-		cat doxygen/doxygen.conf
-		echo "HAVE_DOT=yes"
+		cat action-doxygen/doxygen.conf
+		echo "HAVE_DOT=no"
 		echo "PROJECT_NUMBER=\"$VERSION\""
 	) | doxygen -
 
@@ -149,8 +205,10 @@ fi
 build_zzz \
 	address/*.c \
 	alias/*.c \
+	attach/*.c \
 	autocrypt/*.c \
 	bcache/*.c \
+	color/*.c \
 	compmbox/*.c \
 	compose/*.c \
 	compress/*.c \
@@ -169,6 +227,7 @@ build_zzz \
 	mbox/*.c \
 	menu/*.c \
 	mutt/*.c \
+	mutt/array.h \
 	ncrypt/*.c \
 	nntp/*.c \
 	notmuch/*.c \
@@ -180,7 +239,9 @@ build_zzz \
 	send/*.c \
 	sidebar/*.c \
 	store/*.c \
-	*.c > zzz.inc
+	*.c \
+	mutt_globals.h \
+	options.h > zzz.inc
 
 build_docs
 
