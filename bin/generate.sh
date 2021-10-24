@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# set -o errexit	# set -e
-# set -o nounset	# set -u
+set -o nounset	# set -u
 
 IFS=$'\n'
 LANG=C
@@ -164,7 +163,7 @@ function build_zzz()
 {
 	local FILE
 
-	for FILE in $@; do
+	for FILE in "$@"; do
 		echo "/**"
 		grep " @page " "$FILE"
 		echo " *"
@@ -180,7 +179,7 @@ function build_zzz()
 
 function git_version()
 {
-	git describe --abbrev=6 --match "20*" $(git merge-base master HEAD) | sed 's/\(....\)\(..\)\(..\)/\1-\2-\3/'
+	git describe --abbrev=6 --match "20*" HEAD | sed 's/\(....\)\(..\)\(..\)/\1-\2-\3/'
 }
 
 function build_docs()
@@ -196,11 +195,6 @@ function build_docs()
 	grep -v "Consider increasing DOT_GRAPH_MAX_NODES" doxygen-build.txt | tee tmp.txt
 	test ! -s tmp.txt
 }
-
-if [ -n "$TRAVIS" ]; then
-	git fetch --unshallow --tags
-	git fetch origin 'refs/heads/master:refs/heads/master'
-fi
 
 build_zzz \
 	address/*.c \
@@ -239,7 +233,7 @@ build_zzz \
 	send/*.c \
 	sidebar/*.c \
 	store/*.c \
-	*.c \
+	./*.c \
 	mutt_globals.h \
 	options.h > zzz.inc
 
