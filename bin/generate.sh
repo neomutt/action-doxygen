@@ -186,6 +186,10 @@ function build_docs()
 {
 	VERSION=$(git_version)
 
+	echo "------------------------------"
+	pwd
+	ls action-doxygen
+	echo "------------------------------"
 	(
 		cat action-doxygen/doxygen.conf
 		echo "HAVE_DOT=no"
