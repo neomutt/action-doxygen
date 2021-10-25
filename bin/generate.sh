@@ -188,7 +188,7 @@ function build_docs()
 
 	(
 		cat action-doxygen/doxygen.conf
-		echo "HAVE_DOT=no"
+		echo "HAVE_DOT=yes"
 		echo "PROJECT_NUMBER=\"$VERSION\""
 	) | doxygen -
 
