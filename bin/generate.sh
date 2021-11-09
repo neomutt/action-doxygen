@@ -190,6 +190,7 @@ function build_docs()
 		cat action-doxygen/doxygen.conf
 		echo "HAVE_DOT=yes"
 		echo "PROJECT_NUMBER=\"$VERSION\""
+		echo "WARN_LOGFILE=\"doxygen-build.txt\""
 	) | doxygen -
 
 	grep -v "Consider increasing DOT_GRAPH_MAX_NODES" doxygen-build.txt | tee tmp.txt
