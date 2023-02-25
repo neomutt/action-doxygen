@@ -1,0 +1,9 @@
+Account::adata_free has @param documentation sections but no arguments
+ConnAccount::get_field has @param documentation sections but no arguments
+Email::edata_free has @param documentation sections but no arguments
+ICommand::parse has @param documentation sections but no arguments
+ImapAuth::authenticate has @param documentation sections but no arguments
+Mailbox::mdata_free has @param documentation sections but no arguments
+PopAuth::authenticate has @param documentation sections but no arguments
+SmtpAuth::authenticate has @param documentation sections but no arguments
+warning: ignoring \\dot command because HAVE_DOT is not set
