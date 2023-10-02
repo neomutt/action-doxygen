@@ -203,14 +203,19 @@ build_zzz \
 	attach/*.c \
 	autocrypt/*.c \
 	bcache/*.c \
+	browser/*.c \
 	color/*.c \
+	complete/*.c \
 	compmbox/*.c \
 	compose/*.c \
 	compress/*.c \
 	config/*.c \
 	conn/*.c \
+	convert/*.c \
 	core/*.c \
+	editor/*.c \
 	email/*.c \
+	envelope/*.c \
 	gui/*.c \
 	hcache/*.c \
 	hcache/lib.h \
@@ -218,17 +223,21 @@ build_zzz \
 	history/*.c \
 	imap/*.c \
 	index/*.c \
+	key/*.c \
 	maildir/*.c \
 	mbox/*.c \
 	menu/*.c \
+	mixmaster/*.c \
 	mutt/*.c \
 	mutt/array.h \
 	ncrypt/*.c \
 	nntp/*.c \
 	notmuch/*.c \
 	pager/*.c \
+	parse/*.c \
 	pattern/*.c \
 	pop/*.c \
+	postpone/*.c \
 	progress/*.c \
 	question/*.c \
 	send/*.c \
