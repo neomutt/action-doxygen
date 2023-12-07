@@ -227,6 +227,7 @@ build_zzz \
 	maildir/*.c \
 	mbox/*.c \
 	menu/*.c \
+	mh/*.c \
 	mixmaster/*.c \
 	mutt/*.c \
 	mutt/array.h \
