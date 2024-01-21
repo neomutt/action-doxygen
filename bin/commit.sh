@@ -48,6 +48,8 @@ echo "done"
 if ! git diff-index --quiet HEAD; then
 	git commit --quiet -m "[AUTO] NeoMutt $VERSION"
 	git log --oneline -n 1
+else
+	echo "No changes"
 fi
 
 popd > /dev/null
