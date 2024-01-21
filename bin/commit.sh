@@ -44,8 +44,11 @@ echo -n "Adding files to git... "
 git add .
 echo "done"
 
-git commit --quiet -m "[AUTO] NeoMutt $VERSION"
-git log --oneline -n 1
+# Check for changes
+if ! git diff-index --quiet HEAD; then
+	git commit --quiet -m "[AUTO] NeoMutt $VERSION"
+	git log --oneline -n 1
+fi
 
 popd > /dev/null
 
