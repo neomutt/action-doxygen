@@ -65,8 +65,8 @@ function zzz_data()
 			DESC="${BASH_REMATCH[3]}"
 			echo " * | #$VAR | $DESC | |"
 
-		# WHERE struct ListHead AlternativeOrderList INITVAL(STAILQ_HEAD_INITIALIZER(AlternativeOrderList)); ///< List of preferred mime types to display
-		elif [[ "$L" =~ ^.*[[:space:]*]([a-zA-Z0-9_]+)([[:space:]]INITVAL\(.*\))\;.*///\<[[:space:]](.*) ]]; then
+		# struct ListHead AutoViewList         = STAILQ_HEAD_INITIALIZER(AutoViewList);         ///< List of mime types to auto view
+		elif [[ "$L" =~ ^.*[[:space:]*]([a-zA-Z0-9_]+)([[:space:]].*)\;.*///\<[[:space:]](.*) ]]; then
 			VAR="${BASH_REMATCH[1]}"
 			DESC="${BASH_REMATCH[3]}"
 			echo " * | #$VAR | $DESC | |"
@@ -244,9 +244,7 @@ build_zzz \
 	send/*.c \
 	sidebar/*.c \
 	store/*.c \
-	./*.c \
-	mutt_globals.h \
-	options.h > zzz.inc
+	./*.c > zzz.inc
 
 build_docs
 
