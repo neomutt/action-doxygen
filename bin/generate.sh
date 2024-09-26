@@ -228,7 +228,6 @@ build_zzz \
 	mbox/*.c \
 	menu/*.c \
 	mh/*.c \
-	mixmaster/*.c \
 	mutt/*.c \
 	mutt/array.h \
 	ncrypt/*.c \
