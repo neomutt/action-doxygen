@@ -204,6 +204,7 @@ build_zzz \
 	autocrypt/*.c \
 	bcache/*.c \
 	browser/*.c \
+	cli/*.c \
 	color/*.c \
 	complete/*.c \
 	compmbox/*.c \
@@ -216,6 +217,7 @@ build_zzz \
 	editor/*.c \
 	email/*.c \
 	envelope/*.c \
+	expando/*.c \
 	gui/*.c \
 	hcache/*.c \
 	hcache/lib.h \
