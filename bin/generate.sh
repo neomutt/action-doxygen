@@ -226,6 +226,7 @@ build_zzz \
 	imap/*.c \
 	index/*.c \
 	key/*.c \
+	lua/*.c \
 	maildir/*.c \
 	mbox/*.c \
 	menu/*.c \
