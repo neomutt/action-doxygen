@@ -32,7 +32,7 @@ pushd "$DST" > /dev/null
 
 # Remove the old docs
 echo -n "Removing old files... "
-git rm -r --quiet ./*
+find . -name '*.css' -o -name '*.html' -o -name '*.js' -o -name '*.map' -o -name '*.md5' -o -name '*.png' -o -name '*.search' -o -name '*.svg' | xargs git rm --quiet
 echo "done"
 
 # Add the newly generated docs
